@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login</title>
+  <link rel="stylesheet" href="login.css" />
+</head>
+<body>
+  <div class="login-container">
+    <h2>Sign In / Sign Up</h2>
+    
+    <button id="googleLoginBtn">Login with Google</button>
+    <hr />
+    
+    <form id="loginForm" class="auth-form">
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+    </form>
+
+    <form id="signupForm" class="auth-form">
+      <input type="text" id="name" placeholder="Full Name" required />
+      <input type="email" id="signupEmail" placeholder="Email" required />
+      <input type="password" id="signupPassword" placeholder="Password" required />
+      <button type="submit">Sign Up</button>
+    </form>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-auth-compat.js"></script>
+
+  <script>
+    // 🔥 Your Firebase config
+    const firebaseConfig = {
+  apiKey: "AIzaSyA...abc123",
+  authDomain: "your-app.firebaseapp.com",
+  projectId: "your-app",
+  storageBucket: "your-app.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abcdef123456"
+};
+
+    // Google Login
+    document.getElementById("googleLoginBtn").onclick = () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          localStorage.setItem("user", JSON.stringify(result.user));
+          window.location.href = "index.html";
+        })
+        .catch((error) => alert(error.message));
+    };
+
+    // Email Login
+    document.getElementById("loginForm").onsubmit = (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then((res) => {
+          localStorage.setItem("user", JSON.stringify(res.user));
+          window.location.href = "index.html";
+        })
+        .catch((err) => alert(err.message));
+    };
+
+    // Sign Up
+    document.getElementById("signupForm").onsubmit = (e) => {
+      e.preventDefault();
+      const email = document.getElementById("signupEmail").value;
+      const password = document.getElementById("signupPassword").value;
+
+      auth.createUserWithEmailAndPassword(email, password)
+        .then((res) => {
+          localStorage.setItem("user", JSON.stringify(res.user));
+          window.location.href = "index.html";
+        })
+        .catch((err) => alert(err.message));
+    };
+  </script>
+  
+</body>
+</html>

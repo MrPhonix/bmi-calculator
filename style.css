@@ -1,0 +1,178 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  body {
+    background: linear-gradient(to right, #a0c4ff, #6c8cfa);
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  body.dark-mode {
+    background-color: #2c3e50;
+    color: white;
+  }
+  
+  nav {
+    width: 100%;
+    background: #34495e;
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    font-size: 18px;
+  }
+  
+  nav a {
+    color: #ecf0f1;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .profile {
+    margin: 10px;
+    background: #ecf0f1;
+    color: #2c3e50;
+    padding: 10px;
+    border-radius: 10px;
+  }
+  
+  .heading h1 {
+    margin: 30px 0 10px;
+    font-size: 3rem;
+    text-align: center;
+    color: #2c3e50;
+  }
+  
+  .main {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .container {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 600px;
+    width: 100%;
+    text-align: left;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .calform input, .calform select {
+    padding: 10px;
+    margin: 5px 0;
+    width: 100%;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  .calform .button {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .calform .cal, .calform .clr {
+    background: #3498db;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s ease;
+  }
+  
+  .calform .cal:hover, .calform .clr:hover {
+    background: #2980b9;
+  }
+  
+  #results, #recommendation, #dietPlan, #doctorList {
+    margin-top: 20px;
+  }
+  
+  h3, h4, p, li {
+    color: #2c3e50;
+  }
+  
+  footer {
+    background-color: #2980b9;
+    padding: 20px;
+    margin-top: 30px;
+    width: 100%;
+    color: white;
+  }
+  
+  ul {
+    margin-left: 20px;
+  }
+  
+  .toggle-btn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: #3498db;
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .toggle-btn:hover {
+    background: #2980b9;
+  }
+  
+  .history ul {
+    list-style-type: none;
+  }
+  
+  .about-section {
+    background-color: #f7f7f7;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: #333;
+  }
+  
+  .about-section.dark-mode {
+    background-color: #34495e;
+    color: white;
+  }
+  
+  .history-icon {
+    font-size: 18px;
+    margin-right: 8px;
+    color: #3498db;
+  }
+  
+  .section-heading {
+    font-size: 1.5rem;
+    color: #2980b9;
+    margin-bottom: 15px;
+  }
+  
+  .doctor-list li, .bmi-guide li {
+    font-size: 1.1rem;
+    color: #2c3e50;
+  }
+  
+  .history {
+    margin-top: 20px;
+  }
+  
+  .history-icon:hover {
+    color: #2980b9;
+  }
+  

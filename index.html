@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BMI Calculator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="https://www.youtube.com" target="_blank">YouTube Channel</a>
+    <a href="login.html" onclick="toggleLogin()">Sign In / Sign Up</a>
+  </nav>
+
+  <div id="userProfile" class="profile" style="display: none;">
+    <img id="userPic" style="width: 50px; border-radius: 50%;" />
+    <span id="userName"></span> |
+    <span id="userEmail"></span>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <button class="toggle-btn" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+
+  <div class="heading">
+    <h1>BMI CALCULATOR</h1>
+  </div>
+
+  <div class="main">
+    <div class="container">
+      <form class="calform" onsubmit="return calculateBMI()">
+        <table width="100%">
+          <tr>
+            <td>Age</td>
+            <td><input type="number" id="age" min="2" max="120" placeholder="Age 2-120" /></td>
+          </tr>
+          <tr>
+            <td>Gender</td>
+            <td>
+              <label><input type="radio" name="gender" value="male" checked /> Male</label>
+              <label><input type="radio" name="gender" value="female" /> Female</label>
+            </td>
+          </tr>
+          <tr>
+            <td>Height</td>
+            <td>
+              <input type="number" id="height" placeholder="Height" required />
+              <select id="heightUnit">
+                <option value="cm">cm</option>
+                <option value="m">m</option>
+                <option value="in">in</option>
+                <option value="ft">ft</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>Weight</td>
+            <td>
+              <input type="number" id="weight" placeholder="Weight" required />
+              <select id="weightUnit">
+                <option value="kg">kg</option>
+                <option value="lbs">lbs</option>
+              </select>
+            </td>
+          </tr>
+        </table>
+
+        <div class="button">
+          <input class="cal" type="submit" value="Calculate" />
+          <input class="clr" type="button" value="Clear" onclick="clearForm()" />
+        </div>
+
+        <div id="results"></div>
+        <div id="recommendation"></div>
+        <div id="dietPlan"></div>
+        <div id="doctorList"></div>
+      </form>
+
+      <h3 class="section-heading">BMI Weight Guide</h3>
+      <ul class="bmi-guide">
+        <li>Underweight = BMI less than 18.6</li>
+        <li>Normal weight = BMI between 18.6 and 24.9</li>
+        <li>Overweight = BMI greater than 24.9</li>
+      </ul>
+
+      <p>The BMI Calculator provides personalized health advice based on your input and includes top doctor recommendations in India.</p>
+
+      <div class="history">
+        <h4><span class="history-icon">&#x1F4D6;</span>History:</h4>
+        <ul id="historyList"></ul>
+      </div>
+
+      <div class="calorie">
+        <h3 class="section-heading">Daily Calorie Requirements</h3>
+        <label>Activity Level</label>
+        <select id="activityLevel">
+          <option value="sedentary">Sedentary</option>
+          <option value="light">Lightly Active</option>
+          <option value="moderate">Moderately Active</option>
+          <option value="active">Very Active</option>
+        </select>
+        <input type="number" id="caloriesWeight" placeholder="Enter weight (kg)" />
+        <button onclick="calculateCalories()">Calculate Calories</button>
+        <div id="calorieResult"></div>
+      </div>
+
+      <div class="workout">
+        <h3 class="section-heading">Workout Suggestions</h3>
+        <p id="workoutSuggestion"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="about-section" id="aboutSection">
+    <h4>About this website</h4>
+    <p>This BMI Calculator offers accurate analysis, diet plans, and doctor references. Created by <strong>Shivam Anand</strong> | Version 1.0 | 2025</p>
+  </div>
+
+  <footer>
+    <h4>Contact Us</h4>
+    <p>For more information or inquiries, please reach out to us at <strong>contact@bmiwebsite.com</strong></p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
