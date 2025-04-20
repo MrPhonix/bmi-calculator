@@ -110,3 +110,20 @@ function convertWeightToKg(weight, unit) {
   }
   return weight;
 }
+
+function clearForm() {
+  document.getElementById("age").value = "";
+  document.querySelector('input[name="gender"][value="male"]').checked = true;
+  document.getElementById("height").value = "";
+  document.getElementById("heightUnit").value = "cm";
+  document.getElementById("weight").value = "";
+  document.getElementById("weightUnit").value = "kg";
+  document.getElementById("results").innerHTML = "";
+  document.getElementById("recommendation").innerHTML = "";
+  document.getElementById("dietPlan").innerHTML = "";
+  document.getElementById("doctorList").innerHTML = "";
+  document.getElementById("caloriesWeight").value = "";
+  document.getElementById("activityLevel").value = "sedentary";
+  document.getElementById("calorieResult").innerHTML = "";
+  document.getElementById("workoutSuggestion").innerHTML = "";
+}
