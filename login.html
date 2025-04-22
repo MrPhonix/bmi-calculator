@@ -4,26 +4,39 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="login.css" />
 </head>
 <body>
+  <button class="theme-toggle" id="themeToggle">
+    <i class="fas fa-moon"></i>
+  </button>
+
   <div class="login-container">
-    <h2>Sign In / Sign Up</h2>
+    <h2>Welcome Back!</h2>
     
-    <button id="googleLoginBtn">Login with Google</button>
+    <button id="googleLoginBtn">
+      <i class="fab fa-google"></i> Continue with Google
+    </button>
     <hr />
     
+    <div class="toggle-container">
+      <button class="toggle-btn active" id="loginToggle">Sign In</button>
+      <button class="toggle-btn" id="signupToggle">Sign Up</button>
+    </div>
+
     <form id="loginForm" class="auth-form">
       <input type="email" id="email" placeholder="Email" required />
       <input type="password" id="password" placeholder="Password" required />
       <button type="submit">Login</button>
     </form>
 
-    <form id="signupForm" class="auth-form">
+    <form id="signupForm" class="auth-form hidden">
       <input type="text" id="name" placeholder="Full Name" required />
       <input type="email" id="signupEmail" placeholder="Email" required />
       <input type="password" id="signupPassword" placeholder="Password" required />
-      <button type="submit">Sign Up</button>
+      <button type="submit">Create Account</button>
     </form>
   </div>
 
@@ -32,29 +45,75 @@
   <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-auth-compat.js"></script>
 
   <script>
-    // 🔥 Your Firebase config
-    const firebaseConfig = {
-  apiKey: "AIzaSyA...abc123",
-  authDomain: "your-app.firebaseapp.com",
-  projectId: "your-app",
-  storageBucket: "your-app.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef123456"
+    // Firebase config
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDCUFhz6tng4nrfhkAJZUXi8bL1OhiSJEw",
+  authDomain: "bmi-calculator-84c8b.firebaseapp.com",
+  projectId: "bmi-calculator-84c8b",
+  storageBucket: "bmi-calculator-84c8b.firebasestorage.app",
+  messagingSenderId: "665702271653",
+  appId: "1:665702271653:web:88f915e22c984da1759b4c",
+  measurementId: "G-T40B028G7E"
 };
 
+    // Initialize Firebase
+   // Initialize Firebase
+const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const icon = themeToggle.querySelector('i');
+      if (document.body.classList.contains('dark-mode')) {
+        icon.classList.replace('fa-moon', 'fa-sun');
+      } else {
+        icon.classList.replace('fa-sun', 'fa-moon');
+      }
+    });
+
+    // Form Toggle
+    const loginToggle = document.getElementById('loginToggle');
+    const signupToggle = document.getElementById('signupToggle');
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+
+    loginToggle.addEventListener('click', () => {
+      loginForm.classList.remove('hidden');
+      signupForm.classList.add('hidden');
+      loginToggle.classList.add('active');
+      signupToggle.classList.remove('active');
+      document.querySelector('h2').textContent = 'Welcome Back!';
+    });
+
+    signupToggle.addEventListener('click', () => {
+      loginForm.classList.add('hidden');
+      signupForm.classList.remove('hidden');
+      loginToggle.classList.remove('active');
+      signupToggle.classList.add('active');
+      document.querySelector('h2').textContent = 'Create Account';
+    });
+
     // Google Login
-    document.getElementById("googleLoginBtn").onclick = () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-        .then((result) => {
-          localStorage.setItem("user", JSON.stringify(result.user));
-          window.location.href = "index.html";
-        })
-        .catch((error) => alert(error.message));
-    };
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+// Trigger Google sign-in
+document.getElementById("googleLoginBtn").addEventListener("click", () => {
+  firebase.auth().signInWithPopup(provider)
+    .then((result) => {
+      console.log("Google login success!", result.user);
+      window.location.href = "index.html"; // Redirect after login
+    })
+    .catch((error) => {
+      console.error("Google login error:", error);
+      alert(error.message); // Show detailed error
+    });
+});
 
     // Email Login
-    document.getElementById("loginForm").onsubmit = (e) => {
+    document.getElementById("loginForm").addEventListener("submit", (e) => {
       e.preventDefault();
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
@@ -62,13 +121,15 @@
       auth.signInWithEmailAndPassword(email, password)
         .then((res) => {
           localStorage.setItem("user", JSON.stringify(res.user));
-          window.location.href = "index.html";
+          window.location.href = "index.html"; // Redirect to BMI page
         })
-        .catch((err) => alert(err.message));
-    };
+        .catch((err) => {
+          alert(err.message);
+        });
+    });
 
     // Sign Up
-    document.getElementById("signupForm").onsubmit = (e) => {
+    document.getElementById("signupForm").addEventListener("submit", (e) => {
       e.preventDefault();
       const email = document.getElementById("signupEmail").value;
       const password = document.getElementById("signupPassword").value;
@@ -76,10 +137,12 @@
       auth.createUserWithEmailAndPassword(email, password)
         .then((res) => {
           localStorage.setItem("user", JSON.stringify(res.user));
-          window.location.href = "index.html";
+          window.location.href = "index.html"; // Redirect to BMI page
         })
-        .catch((err) => alert(err.message));
-    };
+        .catch((err) => {
+          alert(err.message);
+        });
+    });
   </script>
   
 </body>

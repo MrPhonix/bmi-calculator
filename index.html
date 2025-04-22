@@ -3,124 +3,140 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BMI Calculator</title>
+  <title>BMI & Health Tracker</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="https://www.youtube.com" target="_blank">YouTube Channel</a>
-    <a href="login.html" onclick="toggleLogin()">Sign In / Sign Up</a>
-  </nav>
-
-  <div id="userProfile" class="profile" style="display: none;">
-    <img id="userPic" style="width: 50px; border-radius: 50%;" />
-    <span id="userName"></span> |
-    <span id="userEmail"></span>
-    <button onclick="logout()">Logout</button>
-  </div>
-
-  <button class="toggle-btn" onclick="toggleDarkMode()">Toggle Dark Mode</button>
-
-  <div class="heading">
-    <h1>BMI CALCULATOR</h1>
-  </div>
-
-  <div class="main">
+  <!-- Header with Profile Menu -->
+  <header class="header">
     <div class="container">
-      <form class="calform" onsubmit="return calculateBMI()">
-        <table width="100%">
-          <tr>
-            <td>Age</td>
-            <td><input type="number" id="age" min="2" max="120" placeholder="Age 2-120" /></td>
-          </tr>
-          <tr>
-            <td>Gender</td>
-            <td>
-              <label><input type="radio" name="gender" value="male" checked /> Male</label>
-              <label><input type="radio" name="gender" value="female" /> Female</label>
-            </td>
-          </tr>
-          <tr>
-            <td>Height</td>
-            <td>
-              <input type="number" id="height" placeholder="Height" required />
-              <select id="heightUnit">
-                <option value="cm">cm</option>
-                <option value="m">m</option>
-                <option value="in">in</option>
-                <option value="ft">ft</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td>Weight</td>
-            <td>
-              <input type="number" id="weight" placeholder="Weight" required />
-              <select id="weightUnit">
-                <option value="kg">kg</option>
-                <option value="lbs">lbs</option>
-              </select>
-            </td>
-          </tr>
-        </table>
-
-        <div class="button">
-          <input class="cal" type="submit" value="Calculate" />
-          <input class="clr" type="button" value="Clear" onclick="clearForm()" />
+      <div class="logo">Health Tracker</div>
+      
+      <!-- Profile Menu -->
+      <div class="profile-menu hidden" id="profileMenu">
+        <div class="profile-header">
+          <div class="profile-photo-container">
+            <img id="profilePhoto" src="default-profile.jpg" alt="Profile Photo">
+            <label for="photoUpload" class="edit-photo-btn">
+              <i class="fas fa-camera"></i>
+            </label>
+            <input type="file" id="photoUpload" accept="image/*" style="display: none;">
+          </div>
+          <div class="profile-info">
+            <h3 id="profileUserName">User</h3>
+            <p id="profileUserEmail">user@example.com</p>
+            <button id="editProfileBtn" class="edit-profile-btn">
+              <i class="fas fa-edit"></i> Edit Profile
+            </button>
+          </div>
         </div>
-
-        <div id="results"></div>
-        <div id="recommendation"></div>
-        <div id="dietPlan"></div>
-        <div id="doctorList"></div>
-      </form>
-
-      <h3 class="section-heading">BMI Weight Guide</h3>
-      <ul class="bmi-guide">
-        <li>Underweight = BMI less than 18.6</li>
-        <li>Normal weight = BMI between 18.6 and 24.9</li>
-        <li>Overweight = BMI greater than 24.9</li>
-      </ul>
-
-      <p>The BMI Calculator provides personalized health advice based on your input and includes top doctor recommendations in India.</p>
-
-      <div class="history">
-        <h4><span class="history-icon">&#x1F4D6;</span>History:</h4>
-        <ul id="historyList"></ul>
+        
+        <div class="profile-section">
+          <h4>BMI History</h4>
+          <ul id="bmiHistoryList"></ul>
+        </div>
+        
+        <button id="logoutButton" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
       </div>
+      
+      
+      <!-- Login Button -->
+      <a href="login.html" class="login-btn" id="loginButton">
+        <i class="fas fa-user"></i> Login/SignUp
+      </a>
+    </div>
+  </header>
 
-      <div class="calorie">
-        <h3 class="section-heading">Daily Calorie Requirements</h3>
-        <label>Activity Level</label>
-        <select id="activityLevel">
-          <option value="sedentary">Sedentary</option>
-          <option value="light">Lightly Active</option>
-          <option value="moderate">Moderately Active</option>
-          <option value="active">Very Active</option>
-        </select>
-        <input type="number" id="caloriesWeight" placeholder="Enter weight (kg)" />
-        <button onclick="calculateCalories()">Calculate Calories</button>
-        <div id="calorieResult"></div>
+  <div class="main-container">
+    <div class="hero">
+      <h1>Track Your Health with Ease</h1>
+      <p>Your personalized BMI, calorie guide, diet, and more</p>
+    </div>
+
+    <div class="profile">
+      <div class="profile-photo-container">
+        <img src="default-profile.jpg" alt="User" id="mainProfileImage" width="80" height="80">
       </div>
-
-      <div class="workout">
-        <h3 class="section-heading">Workout Suggestions</h3>
-        <p id="workoutSuggestion"></p>
+      <div>
+        <h2 id="welcomeMessage">Welcome, User!</h2>
+        <p>Stay healthy 💪</p>
       </div>
     </div>
-  </div>
 
-  <div class="about-section" id="aboutSection">
-    <h4>About this website</h4>
-    <p>This BMI Calculator offers accurate analysis, diet plans, and doctor references. Created by <strong>Shivam Anand</strong> | Version 1.0 | 2025</p>
+    <!-- BMI Calculator -->
+    <div class="form-section">
+      <label for="height">Height (cm):</label>
+      <input type="number" id="height" placeholder="Enter your height">
+      <label for="weight">Weight (kg):</label>
+      <input type="number" id="weight" placeholder="Enter your weight">
+      <button id="calculateBMI">Calculate BMI</button>
+      <button id="clearForm">Clear</button>
+    </div>
+
+    <!-- Results Sections -->
+    <div id="result"></div>
+    <div id="bmiCategory"></div>
+    <div id="healthAdvice"></div>
+    <div id="dietPlan"></div>
+    <div id="workout"></div>
+    <div id="calories"></div>
+
+    <!-- Doctor List -->
+    <details>
+      <summary><strong>Top Doctors & Dieticians</strong></summary>
+      <div id="doctorList"></div>
+    </details>
+
+    <!-- History -->
+    <h3>Your BMI History</h3>
+    <div id="history"></div>
+    <button id="clearHistory">Clear History</button>
+
+    <!-- Calorie Calculator -->
+    <div class="calform">
+      <h3>Calorie Calculator</h3>
+      <label for="age">Age:</label>
+      <input type="number" id="age">
+      <label for="gender">Gender:</label>
+      <select id="gender">
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+      <label for="activity">Activity Level:</label>
+      <select id="activity">
+        <option value="1.2">Sedentary (little or no exercise)</option>
+        <option value="1.375">Lightly Active (light exercise 1-3 days/week)</option>
+        <option value="1.55">Moderately Active (moderate exercise 3-5 days/week)</option>
+        <option value="1.725">Very Active (hard exercise 6-7 days/week)</option>
+      </select>
+      <button id="calculateCalories">Calculate Calories</button>
+    </div>
+
+    <button id="darkModeToggle" class="dark-mode-btn">
+      <i class="fas fa-moon"></i> Dark Mode
+    </button>
   </div>
 
   <footer>
-    <h4>Contact Us</h4>
-    <p>For more information or inquiries, please reach out to us at <strong>contact@bmiwebsite.com</strong></p>
+    <p>&copy; 2025 Health Tracker App. All rights reserved.</p>
   </footer>
 
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-storage-compat.js"></script>
+  
   <script src="script.js"></script>
 </body>
 </html>
+
