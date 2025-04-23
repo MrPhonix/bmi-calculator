@@ -10,6 +10,7 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 // ===== DARK MODE FUNCTIONS =====
 function initializeDarkMode() {
@@ -45,28 +46,53 @@ function updateProfileUI(user) {
   loginButton.classList.add('hidden');
   
   // Update all profile images
-  const profileImages = document.querySelectorAll('#profilePhoto, #dropdownProfileImage, #mainProfileImage');
+  const profileImages = document.querySelectorAll('.profile-image');
   profileImages.forEach(img => {
     img.src = user.photoURL || 'default-profile.jpg';
+    img.alt = user.displayName || 'User';
   });
   
   // Update user info
-  document.getElementById('profileUser Name').textContent = user.displayName || 'User ';
-  document.getElementById('profileUser Email').textContent = user.email;
-  document.getElementById('welcomeMessage').textContent = `Welcome, ${user.displayName || 'User '}!`;
+  document.getElementById('profileUserName').textContent = user.displayName || 'User';
+  document.getElementById('profileUserEmail').textContent = user.email || '';
+  document.getElementById('dropdownProfileName').textContent = user.displayName || 'User';
+  document.getElementById('welcomeMessage').textContent = `Welcome, ${user.displayName || 'User'}!`;
 }
 
+// ===== DROPDOWN TOGGLE FUNCTIONALITY =====
+document.addEventListener('DOMContentLoaded', () => {
+  // Add click event for profile trigger
+  const profileTrigger = document.getElementById('profileTrigger');
+  if (profileTrigger) {
+    profileTrigger.addEventListener('click', function(e) {
+      e.stopPropagation(); // Prevent immediate closing
+      const profileMenu = document.getElementById('profileMenu');
+      profileMenu.classList.toggle('hidden');
+    });
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    const profileMenu = document.getElementById('profileMenu');
+    const profileTrigger = document.getElementById('profileTrigger');
+    
+    if (!profileMenu.contains(e.target) && !profileTrigger.contains(e.target)) {
+      profileMenu.classList.add('hidden');
+    }
+  });
+});
+
 // Handle photo upload
-document.getElementById('photoUpload').addEventListener('change', function(e) {
+document.getElementById('photoUpload')?.addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (file) {
-    const user = firebase.auth().currentUser ;
+    const user = firebase.auth().currentUser;
     const storageRef = firebase.storage().ref(`profile_photos/${user.uid}`);
     
     storageRef.put(file).then(() => {
       storageRef.getDownloadURL().then(url => {
         // Update profile photo in UI
-        const profileImages = document.querySelectorAll('#profilePhoto, #dropdownProfileImage, #mainProfileImage');
+        const profileImages = document.querySelectorAll('.profile-image');
         profileImages.forEach(img => {
           img.src = url;
         });
@@ -76,8 +102,7 @@ document.getElementById('photoUpload').addEventListener('change', function(e) {
           photoURL: url
         });
         
-        // Update in Firestore if needed
-        const db = firebase.firestore();
+        // Update in Firestore
         db.collection('users').doc(user.uid).update({
           photoURL: url
         });
@@ -87,72 +112,108 @@ document.getElementById('photoUpload').addEventListener('change', function(e) {
 });
 
 // Handle edit profile
-document.getElementById('editProfileBtn').addEventListener('click', function() {
-  const user = firebase.auth().currentUser ;
-  const currentName = user.displayName || 'User ';
+document.getElementById('editProfileBtn')?.addEventListener('click', function() {
+  const user = firebase.auth().currentUser;
+  const currentName = user.displayName || 'User';
   const newName = prompt("Enter your new name:", currentName);
   
   if (newName && newName !== currentName) {
     user.updateProfile({
       displayName: newName
     }).then(() => {
-      document.getElementById('profileUser Name').textContent = newName;
-      document.getElementById('welcomeMessage')
+      // Update all instances of the user's name
+      document.getElementById('profileUserName').textContent = newName;
+      document.getElementById('dropdownProfileName').textContent = newName;
+      document.getElementById('welcomeMessage').textContent = `Welcome, ${newName}!`;
       
-      // Update in Firestore if needed
-      const db = firebase.firestore();
+      // Update in Firestore
       db.collection('users').doc(user.uid).update({
-        displayName: newName
+        displayName: newName,
+        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
       });
+    }).catch(error => {
+      console.error("Error updating profile:", error);
     });
   }
 });
 
 // ===== AUTH FUNCTIONS =====
-firebase.auth().onAuthStateChanged(user => {
-  if (user) {
-    // User is signed in
-    updateProfileUI(user);
-    loadUserData(user.uid);
-  } else {
-    // User is signed out
-    document.getElementById('profileMenu').classList.add('hidden');
-    document.getElementById('loginButton').classList.remove('hidden');
-    document.getElementById('welcomeMessage').textContent = "Welcome, User!";
-    document.getElementById('mainProfileImage').src = "default-profile.jpg";
-    renderHistory(); // Show local history for guests
+firebase.auth().onAuthStateChanged(async user => {
+  try {
+    if (user) {
+      // User is signed in
+      updateProfileUI(user);
+      
+      // Ensure user document exists
+      await db.collection('users').doc(user.uid).set({
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || 'User',
+        photoURL: user.photoURL || '',
+        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+        bmiHistory: firebase.firestore.FieldValue.arrayUnion(...[])
+      }, { merge: true });
+      
+      // Load user data (will handle history migration)
+      await loadUserData(user.uid);
+    } else {
+      // User is signed out
+      document.getElementById('profileMenu')?.classList.add('hidden');
+      document.getElementById('loginButton')?.classList.remove('hidden');
+      document.getElementById('welcomeMessage').textContent = "Welcome, User!";
+      document.querySelectorAll('.profile-image').forEach(img => {
+        img.src = "default-profile.jpg";
+      });
+      renderHistory(); // Show local history for guests
+    }
+  } catch (error) {
+    console.error("Auth state change error:", error);
   }
 });
 
 // Logout function
-document.getElementById('logoutButton').addEventListener('click', function() {
+document.getElementById('logoutButton')?.addEventListener('click', function() {
   firebase.auth().signOut().then(() => {
     console.log("User signed out");
+    // Close the dropdown menu after logout
+    document.getElementById('profileMenu').classList.add('hidden');
   }).catch(error => {
     console.error("Sign out error:", error);
   });
 });
 
 // ===== BMI CALCULATOR =====
-document.getElementById('calculateBMI').addEventListener('click', calculateBMI);
-document.getElementById('clearForm').addEventListener('click', clearForm);
+document.getElementById('calculateBMI')?.addEventListener('click', calculateBMI);
+document.getElementById('clearForm')?.addEventListener('click', clearForm);
 
-function calculateBMI() {
-  const height = parseFloat(document.getElementById('height').value);
-  const weight = parseFloat(document.getElementById('weight').value);
+async function calculateBMI() {
+  try {
+    const height = parseFloat(document.getElementById('height').value);
+    const weight = parseFloat(document.getElementById('weight').value);
 
-  if (!height || !weight) return alert("Enter valid height and weight!");
+    if (!height || !weight) {
+      alert("Please enter valid height and weight!");
+      return;
+    }
 
-  const bmi = (weight / ((height / 100) ** 2)).toFixed(2);
-  showBMIResult(bmi);
-  
-  // Store in Firestore if logged in
-  const user = firebase.auth().currentUser;
-  if (user) {
-    storeBMI(user.uid, bmi);
-  } else {
-    // Fallback to localStorage
-    storeHistory(bmi);
+    const bmi = (weight / ((height / 100) ** 2)).toFixed(2);
+    showBMIResult(bmi);
+    
+    // Store the result
+    const user = firebase.auth().currentUser;
+    if (user) {
+      await storeBMI(user.uid, bmi);
+    } else {
+      // Fallback to localStorage for guests
+      const date = new Date().toISOString();
+      let history = JSON.parse(localStorage.getItem("bmiHistory")) || [];
+      history.push({ date, bmi });
+      localStorage.setItem("bmiHistory", JSON.stringify(history));
+      renderHistory();
+    }
+  } catch (error) {
+    console.error("Error calculating BMI:", error);
+    alert("An error occurred while calculating BMI. Please try again.");
   }
 }
 
@@ -321,7 +382,7 @@ function suggestWorkout(bmi) {
 }
 
 // ===== CALORIE CALCULATOR =====
-document.getElementById('calculateCalories').addEventListener('click', calculateCalories);
+document.getElementById('calculateCalories')?.addEventListener('click', calculateCalories);
 
 function calculateCalories() {
   const age = parseFloat(document.getElementById('age').value);
@@ -358,94 +419,163 @@ function calculateCalories() {
 }
 
 // ===== HISTORY FUNCTIONS =====
-document.getElementById('clearHistory').addEventListener('click', clearHistory);
+document.getElementById('clearHistory')?.addEventListener('click', clearHistory);
 
-function storeHistory(bmi) {
-  const date = new Date().toLocaleDateString();
-  let history = JSON.parse(localStorage.getItem("bmiHistory")) || [];
-  history.push({ date, bmi });
-  localStorage.setItem("bmiHistory", JSON.stringify(history));
-  renderHistory();
-}
+async function loadUserData(userId) {
+  try {
+    const doc = await db.collection('users').doc(userId).get();
+    
+    if (doc.exists) {
+      const userData = doc.data();
+      
+      // Check if we have local history to migrate
+      const localHistory = JSON.parse(localStorage.getItem("bmiHistory")) || [];
+      if (localHistory.length > 0) {
+        // Convert local history to Firestore format
+        const historyEntries = localHistory.map(entry => ({
+          bmi: entry.bmi,
+          timestamp: new Date(entry.date)
+        }));
 
-function renderHistory() {
-  const history = JSON.parse(localStorage.getItem("bmiHistory")) || [];
-  let output = "<ul>";
-  history.forEach(entry => {
-    output += `<li>${entry.date}: BMI = ${entry.bmi}</li>`;
-  });
-  output += "</ul>";
-  document.getElementById("history").innerHTML = output;
-}
+        // Add to Firestore
+        await db.collection('users').doc(userId).update({
+          bmiHistory: firebase.firestore.FieldValue.arrayUnion(...historyEntries)
+        });
 
-function clearHistory() {
-  localStorage.removeItem("bmiHistory");
-  renderHistory();
-  document.getElementById('bmiHistoryList').innerHTML = "";
-}
-
-// ===== FIREBASE DATA FUNCTIONS =====
-function loadUserData(userId) {
-  const db = firebase.firestore();
-  
-  db.collection('users').doc(userId).get()
-    .then(doc => {
-      if (doc.exists) {
-        const userData = doc.data();
+        // Clear local storage
+        localStorage.removeItem("bmiHistory");
         
-        // Update BMI history
-        if (userData.bmiHistory && userData.bmiHistory.length > 0) {
-          updateHistoryUI(userData.bmiHistory);
-        }
+        // Reload data after migration
+        return loadUserData(userId);
       }
-    })
-    .catch(error => {
-      console.error("Error loading user data:", error);
-    });
+
+      // Update UI with history
+      if (userData.bmiHistory) {
+        updateHistoryUI(userData.bmiHistory);
+      } else {
+        document.getElementById('history').innerHTML = "<p>No history yet. Calculate your BMI to get started!</p>";
+      }
+    }
+  } catch (error) {
+    console.error("Error loading user data:", error);
+    renderHistory();
+  }
 }
 
 function updateHistoryUI(history) {
-  const historyList = document.getElementById('bmiHistoryList');
-  const mainHistoryList = document.getElementById('history');
-  
-  // Profile dropdown history
-  historyList.innerHTML = history
-    .slice(-5) // Show last 5 entries
-    .reverse() // Newest first
-    .map(entry => `
-      <li>
-        <span>${entry.bmi}</span>
-        <span>${new Date(entry.timestamp?.toDate()).toLocaleDateString()}</span>
-      </li>
-    `)
-    .join('');
-  
-  // Main history section
-  mainHistoryList.innerHTML = "<ul>" + history
-    .map(entry => `
-      <li>
-        <span>${new Date(entry.timestamp?.toDate()).toLocaleDateString()}</span>
-        <span>BMI: ${entry.bmi}</span>
-      </li>
-    `)
-    .join('') + "</ul>";
+  try {
+    const historyList = document.getElementById('bmiHistoryList');
+    const mainHistoryList = document.getElementById('history');
+    
+    if (!history || !Array.isArray(history)) {
+      history = [];
+    }
+    
+    // Sort history by timestamp (newest first)
+    const sortedHistory = [...history].sort((a, b) => {
+      const dateA = a.timestamp?.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
+      const dateB = b.timestamp?.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
+      return dateB - dateA;
+    });
+
+    // Profile dropdown history (last 5 entries)
+    if (historyList) {
+      historyList.innerHTML = sortedHistory.slice(0, 5).map(entry => `
+        <li>
+          <span>${entry.bmi}</span>
+          <span>${entry.timestamp?.toDate?.().toLocaleDateString() || new Date(entry.timestamp).toLocaleDateString()}</span>
+        </li>
+      `).join('');
+    }
+    
+    // Main history section (all entries)
+    if (mainHistoryList) {
+      if (sortedHistory.length > 0) {
+        mainHistoryList.innerHTML = "<ul>" + sortedHistory.map(entry => `
+          <li>
+            <span>${entry.timestamp?.toDate?.().toLocaleDateString() || new Date(entry.timestamp).toLocaleDateString()}</span>
+            <span>BMI: ${entry.bmi}</span>
+          </li>
+        `).join('') + "</ul>";
+      } else {
+        mainHistoryList.innerHTML = "<p>No history yet. Calculate your BMI to get started!</p>";
+      }
+    }
+  } catch (error) {
+    console.error("Error updating history UI:", error);
+  }
 }
 
-function storeBMI(userId, bmiValue) {
-  const db = firebase.firestore();
-  const bmiEntry = {
-    bmi: bmiValue,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  };
-  
-  db.collection('users').doc(userId).update({
-    bmiHistory: firebase.firestore.FieldValue.arrayUnion(bmiEntry)
-  })
-  .then(() => {
+function renderHistory() {
+  try {
+    const user = firebase.auth().currentUser;
+    const historyElement = document.getElementById('history');
+    
+    if (!user) {
+      // For guests, show local storage history
+      const history = JSON.parse(localStorage.getItem("bmiHistory")) || [];
+      
+      if (history.length > 0) {
+        historyElement.innerHTML = "<ul>" + history.map(entry => `
+          <li>
+            <span>${new Date(entry.date).toLocaleDateString()}</span>
+            <span>BMI: ${entry.bmi}</span>
+          </li>
+        `).join('') + "</ul>";
+      } else {
+        historyElement.innerHTML = "<p>No history yet. Calculate your BMI to get started!</p>";
+      }
+    }
+  } catch (error) {
+    console.error("Error rendering history:", error);
+  }
+}
+
+async function clearHistory() {
+  try {
+    const user = firebase.auth().currentUser;
+    
+    if (user) {
+      // Clear Firestore history
+      await db.collection('users').doc(user.uid).update({
+        bmiHistory: []
+      });
+    } else {
+      // Clear local storage history
+      localStorage.removeItem("bmiHistory");
+    }
+    
+    // Update UI
+    document.getElementById('bmiHistoryList').innerHTML = "";
+    document.getElementById('history').innerHTML = "<p>No history yet. Calculate your BMI to get started!</p>";
+  } catch (error) {
+    console.error("Error clearing history:", error);
+  }
+}
+
+async function storeBMI(userId, bmiValue) {
+  try {
+    const bmiEntry = {
+      bmi: bmiValue,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    // Add the new BMI entry to Firestore
+    await db.collection('users').doc(userId).update({
+      bmiHistory: firebase.firestore.FieldValue.arrayUnion(bmiEntry)
+    });
+
     console.log("BMI stored successfully");
-    loadUserData(userId);
-  })
-  .catch(error => console.error("Error storing BMI:", error));
+    await loadUserData(userId); // Refresh the history display
+  } catch (error) {
+    console.error("Error storing BMI:", error);
+    // Fallback to localStorage if Firestore fails
+    const date = new Date().toISOString();
+    let history = JSON.parse(localStorage.getItem("bmiHistory")) || [];
+    history.push({ date, bmi: bmiValue });
+    localStorage.setItem("bmiHistory", JSON.stringify(history));
+    renderHistory();
+  }
 }
 
 // ===== DOCTOR LIST =====
@@ -489,14 +619,16 @@ const doctors = [
 
 function renderDoctorList() {
   const doctorList = document.getElementById('doctorList');
-  doctorList.innerHTML = doctors.map(doctor => `
-    <div class="doctor-card">
-      <h4>${doctor.name}</h4>
-      <p><strong>Specialty:</strong> ${doctor.specialty}</p>
-      <p><strong>Hospital:</strong> ${doctor.hospital}, ${doctor.city}</p>
-      <p><strong>Contact:</strong> ${doctor.contact}</p>
-    </div>
-  `).join('');
+  if (doctorList) {
+    doctorList.innerHTML = doctors.map(doctor => `
+      <div class="doctor-card">
+        <h4>${doctor.name}</h4>
+        <p><strong>Specialty:</strong> ${doctor.specialty}</p>
+        <p><strong>Hospital:</strong> ${doctor.hospital}, ${doctor.city}</p>
+        <p><strong>Contact:</strong> ${doctor.contact}</p>
+      </div>
+    `).join('');
+  }
 }
 
 // ===== UTILITY FUNCTIONS =====
@@ -512,13 +644,21 @@ function clearForm() {
   document.getElementById('calories').innerHTML = "";
 }
 
-
 // ===== INITIALIZATION =====
 document.addEventListener("DOMContentLoaded", () => {
   initializeDarkMode();
   renderDoctorList();
-  renderHistory();
   
+  // Initial render based on auth state
+  firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+      loadUserData(user.uid);
+    } else {
+      renderHistory();
+    }
+  });
+  
+  // Optional: Redirect if on localhost
   if (window.location.hostname === 'localhost') {
     window.location.href = "https://bmi-calculator-84c8b.web.app";
   }

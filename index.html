@@ -19,35 +19,43 @@
     <div class="container">
       <div class="logo">Health Tracker</div>
       
-      <!-- Profile Menu -->
-      <div class="profile-menu hidden" id="profileMenu">
-        <div class="profile-header">
-          <div class="profile-photo-container">
-            <img id="profilePhoto" src="default-profile.jpg" alt="Profile Photo">
-            <label for="photoUpload" class="edit-photo-btn">
-              <i class="fas fa-camera"></i>
-            </label>
-            <input type="file" id="photoUpload" accept="image/*" style="display: none;">
-          </div>
-          <div class="profile-info">
-            <h3 id="profileUserName">User</h3>
-            <p id="profileUserEmail">user@example.com</p>
-            <button id="editProfileBtn" class="edit-profile-btn">
-              <i class="fas fa-edit"></i> Edit Profile
-            </button>
-          </div>
+      <!-- Profile Dropdown -->
+      <div class="profile-dropdown">
+        <div class="profile-trigger" id="profileTrigger">
+          <img id="dropdownProfileImage" class="profile-image" src="default-profile.jpg" alt="Profile">
+          <span id="dropdownProfileName">User</span>
+          <i class="fas fa-chevron-down"></i>
         </div>
         
-        <div class="profile-section">
-          <h4>BMI History</h4>
-          <ul id="bmiHistoryList"></ul>
+        <!-- Profile Menu -->
+        <div class="profile-menu hidden" id="profileMenu">
+          <div class="profile-header">
+            <div class="profile-photo-container">
+              <img id="profilePhoto" class="profile-image" src="default-profile.jpg" alt="Profile Photo">
+              <label for="photoUpload" class="edit-photo-btn">
+                <i class="fas fa-camera"></i>
+                <input type="file" id="photoUpload" accept="image/jpeg, image/png" style="display: none;">
+              </label>
+            </div>
+            <div class="profile-info">
+              <h3 id="profileUserName">User</h3>
+              <p id="profileUserEmail">user@example.com</p>
+              <button id="editProfileBtn" class="edit-profile-btn">
+                <i class="fas fa-edit"></i> Edit Profile
+              </button>
+            </div>
+          </div>
+          
+          <div class="profile-section">
+            <h4>BMI History</h4>
+            <ul id="bmiHistoryList"></ul>
+          </div>
+          
+          <button id="logoutButton" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
         </div>
-        
-        <button id="logoutButton" class="logout-btn">
-          <i class="fas fa-sign-out-alt"></i> Logout
-        </button>
       </div>
-      
       
       <!-- Login Button -->
       <a href="login.html" class="login-btn" id="loginButton">
@@ -64,7 +72,7 @@
 
     <div class="profile">
       <div class="profile-photo-container">
-        <img src="default-profile.jpg" alt="User" id="mainProfileImage" width="80" height="80">
+        <img src="default-profile.jpg" class="profile-image" alt="User" id="mainProfileImage" width="80" height="80">
       </div>
       <div>
         <h2 id="welcomeMessage">Welcome, User!</h2>
@@ -136,7 +144,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-storage-compat.js"></script>
   
+  <!-- CompressorJS for image compression -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/compressorjs/1.2.1/compressor.min.js"></script>
+  
   <script src="script.js"></script>
 </body>
 </html>
-
